@@ -135,7 +135,15 @@ $(document).ready(function () {
 
 *dplyr: provides the most common verbs for data manipulation in tables
 
-*tidyr: variety of functions to clean up data in a table in order to make it “tidy”</code></pre>
+*tidyr: variety of functions to clean up data in a table in order to make it “tidy”
+
+*stringer
+
+*replyr
+
+*shape
+
+*shape2</code></pre>
 </div>
 <div id="reading-files-into-r" class="section level2">
 <h2>Reading Files into R</h2>
@@ -171,15 +179,6 @@ $(document).ready(function () {
   train_data &lt;- cbind( subject_train, y_train, x_train_data)
   all_data &lt;- rbind(test_data, train_data)</code></pre>
 <p>Column names are the subject ID, activity code, plus the readings as named in features.txt. The features can be tidied before creating before setting the names.</p>
-<pre><code>  feature_list &lt;- unlist(features, use.names = FALSE)
-  feature_nospace &lt;- sub(&quot; &quot;,&quot;&quot;, feature_list)
-  feature_nonum &lt;- gsub(&quot;^[1-9,0]+|^[1-9,0]+|^[1-9,0]&quot;, &quot;&quot;, feature_nospace)
-  feature_columns &lt;- tolower(feature_nonum)
-  words_columns &lt;- gsub(&quot;^[t]&quot;,&quot;total&quot;, feature_columns)
-  words_columns &lt;- gsub(&quot;^[f]&quot;, &quot;fourier&quot;, words_columns)
-  nochar_columns &lt;-gsub(&quot;[/-]|[/(]|[/)]|[/-]|[/,]&quot;, &quot;&quot;, words_columns)
-  column_names &lt;- c(&quot;subject&quot;, &quot;activity_code&quot;,nochar_columns)
-  colnames(all_data) &lt;- column_names</code></pre>
 <p>Set first two columns as factors</p>
 <pre><code>  factor(all_data$subject)
   factor(all_data$activity_code)</code></pre>
@@ -188,6 +187,14 @@ $(document).ready(function () {
 <div id="script-2-tidy-data-and-summarization" class="section level1">
 <h1>Script 2: Tidy Data and Summarization</h1>
 <pre><code>  selected_data &lt;- all_data</code></pre>
+<p>Remove meta characters</p>
+<pre><code>  feature_nospace &lt;- sub(&quot; &quot;,&quot;&quot;, column_names)
+  feature_columns &lt;- tolower(feature_nospace)
+  words_columns &lt;- gsub(&quot;^[t]&quot;,&quot;total&quot;, feature_columns)
+  words_columns &lt;- gsub(&quot;^[f]&quot;, &quot;fourier&quot;, words_columns)
+  nochar_columns &lt;-gsub(&quot;[/-]|[/(]|[/)]|[/,]&quot;, &quot;&quot;, words_columns)
+
+  colnames(selected_data) &lt;- nochar_columns</code></pre>
 <p>Create vector with the columns with data that represents mean and standard deviation</p>
 <pre><code>var_mean &lt;- grep(&quot;mean&quot;, names(selected_data), value = TRUE)
 var_std &lt;- grep(&quot;std&quot;, names(selected_data), value = TRUE)</code></pre>
@@ -197,8 +204,10 @@ var_std &lt;- grep(&quot;std&quot;, names(selected_data), value = TRUE)</code></
                         grep(&quot;std&quot;, names(selected_data), value = TRUE))</code></pre>
 <p>Melt the data set to have one observation per row and create a summary table</p>
 <pre><code>  tidy_data &lt;- melt(part_tidy_data, id = c(&quot;subject&quot;, &quot;activity_code&quot;))
-  tidy_mean_data &lt;- split(tidy_data$variable, tidy_data$activity_code)
-  tidy_mean &lt;- lapply(tidy_mean_data, mean)</code></pre>
+  tidy_mean &lt;- dcast(tidy_data, formula = subject + activity_code ~ variable)</code></pre>
+<p>Write the table to a file for submission</p>
+<pre><code>  setwd(&quot;..&quot;)  
+  write.table(tidy_mean, file = &quot;SCOLA_Tidy_File.csv&quot;)</code></pre>
 </div>
 
 

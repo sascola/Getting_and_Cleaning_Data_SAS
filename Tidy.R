@@ -6,6 +6,7 @@ library(tidyr)
 library(stringr)
 library(replyr)
 library(reshape)
+library(reshape2)
 
 # Set working directory to assignment parent
 path <- setwd("~/Desktop/UCI_HAR_Dataset/")
@@ -50,19 +51,12 @@ all_data <- rbind(test_data, train_data)
 ## Add column names
 ## Column names are the subject ID, activity code, plus the readings as named in features.txt
 feature_list <- unlist(features, use.names = FALSE)
-feature_nospace <- sub(" ","", feature_list)
-feature_nonum <- gsub("^[1-9,0]+|^[1-9,0]+|^[1-9,0]", "", feature_nospace)
-feature_columns <- tolower(feature_nonum)
-words_columns <- gsub("^[t]","total", feature_columns)
-words_columns <- gsub("^[f]", "fourier", words_columns)
-nochar_columns <-gsub("[/-]|[/(]|[/)]|[/-]|[/,]", "", words_columns)
-column_names <- c("subject", "activity_code",nochar_columns)
+column_names <- c("subject", "activity_code",feature_list)
 colnames(all_data) <- column_names
 
 # Set first two columns as factors
 ## Set subject as factor
 factor(all_data$subject)
-
 ## Set activity_code as factor
 factor(all_data$activity_code)
 
